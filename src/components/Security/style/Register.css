@@ -1,0 +1,36 @@
+/* src/style/Register.css */
+.form-signup {
+  direction: rtl; /* Définir la direction du texte comme RTL */
+}
+.form-signup .form-group {
+  text-align: right; /* Aligner le texte à droite pour une meilleure apparence */
+  margin-bottom: 20px; /* Ajouter un espace entre les champs */
+}
+.form-signup label {
+  float: right; /* Flotter les étiquettes à droite */
+}
+.profile-image {
+  display: block;
+  margin: 20px auto; /* Centrer l'image horizontalement */
+  width: 100px; /* Ajuster la taille selon les besoins */
+  height: 100px; /* Ajuster la taille selon les besoins */
+  border-radius: 50%; /* Rendre l'image circulaire */
+}
+.btn-custom {
+  background-color: #f56462; /* Couleur de fond personnalisée */
+  border-color: #f56462; /* Couleur de bordure personnalisée */
+  color: white; /* Couleur du texte */
+  display: block;
+  margin: 0 auto; /* Centrer le bouton */
+}
+.btn-custom:hover {
+  background-color: #871c18; /* Teinte plus foncée pour l'effet de survol */
+  border-color: #871c18; /* Teinte plus foncée pour la bordure lors du survol */
+}
+.login-link {
+  color: #f56462; /* Couleur personnalisée du lien */
+}
+.login-link:hover {
+  color: #871c18; /* Teinte plus foncée pour l'effet de survol */
+  text-decoration: underline; /* Optionnel : soulignement au survol */
+}

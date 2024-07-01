@@ -1,0 +1,18 @@
+.Form-container {
+  display: flex;
+  flex-wrap: wrap; /* Pour permettre aux cartes de s'enrouler si l'espace est insuffisant */
+ 
+}
+.btn-add{
+  margin: 1%;
+  padding-left: 71%;
+}
+.title{
+  padding-left: 66%;
+}
+.table-aff{
+  width: 80%;
+  margin: 2%;
+  text-align: center;
+  
+}

@@ -1,0 +1,188 @@
+/* components/Sidebar.css */
+
+/* style/Dashboard.css */
+
+.sidebar {
+  width: 250px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: #333; /* Couleur de fond de la sidebar */
+  padding: 20px;
+  box-sizing: border-box;
+  direction: rtl; /* Direction du texte de droite à gauche */
+}
+
+.sidebar h2 {
+  font-size: 1.5rem;
+  color: #fff; /* Couleur du texte */
+  margin-bottom: 20px;
+}
+
+.sidebar nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 10px;
+}
+
+.sidebar nav ul li a {
+  display: block;
+  text-decoration: none;
+  color: #fff; /* Couleur du texte des liens */
+  font-size: 1rem;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar nav ul li a:hover {
+  background-color: #555; /* Couleur de fond au survol */
+}
+
+/* Style pour le lien actif */
+.sidebar nav ul li a.active {
+  font-weight: bold;
+  background-color: #666; /* Couleur de fond du lien actif */
+}
+.logout-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  font-size: 1rem;
+}
+
+.logout-button:hover {
+  text-decoration: underline;
+}
+
+
+
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+}
+
+.header .notification-icon {
+  order: -1; /* Déplacer l'icône de notification à gauche */
+  margin-right: 10px; /* Facultatif : ajouter une marge à droite de l'icône */
+}
+
+.header input {
+  flex-grow: 1;
+  margin-right: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  direction: rtl; /* Définir la direction du texte comme RTL */
+}
+
+
+.main-content {
+  flex-grow: 1;
+  margin-right: 250px;
+  padding: 20px;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-wrap: wrap;
+  
+}
+
+.dashboard-card {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 10px;
+  width: 291px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+.chart-card,
+.dashboard-table {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 10px;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card h3,
+.chart-card h3,
+.dashboard-table h3 {
+  margin-bottom: 20px;
+}
+
+.dashboard-card p,
+.chart-card p {
+  font-size: 14px;
+}
+
+.dashboard-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dashboard-table th,
+.dashboard-table td {
+  border: 1px solid #dee2e6;
+  padding: 8px;
+  text-align: center;
+}
+
+.dashboard-table th {
+  background-color: #f8f9fa;
+}
+/* Ajout de cette règle pour le conteneur parent des cartes */
+.chart-container {
+  display: flex;
+  flex-wrap: wrap; /* Pour permettre aux cartes de s'enrouler si l'espace est insuffisant */
+ 
+}
+
+.chart-card {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 10px;
+  flex: 1; /* Prendre un espace égal */
+
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar p {
+  font-size: 18px;
+  color: #f5f1f1;
+  margin-bottom: 10px;
+}
+
+.sidebar p span {
+  font-weight: bold;
+  color: #007bff; /* Utilisation d'une couleur bleue par exemple */
+}
+
+
+
