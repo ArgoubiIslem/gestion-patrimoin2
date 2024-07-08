@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Table, Modal } from 'react-bootstrap';
+import { CSVLink } from 'react-csv';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import './style/biens.css';
+import { Navigate } from 'react-router-dom';
+import { getBiens, createBien, updateBien, deleteBien } from './bienService';
+
 export default function Gestiondebien() {
   const [biens, setBiens] = useState([]);
+  const [filteredBiens, setFilteredBiens] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [idBien, setIdBien] = useState('');
   const [nom, setNom] = useState('');
   const [description, setDescription] = useState('');
@@ -12,73 +18,148 @@ export default function Gestiondebien() {
   const [dateAcquisition, setDateAcquisition] = useState('');
   const [valeur, setValeur] = useState('');
   const [etat, setEtat] = useState('');
+  const [image, setImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [modificationHistory, setModificationHistory] = useState({});
+  const [error, setError] = useState(null);
+  const isAuthenticated = !!localStorage.getItem('token');
+  const token = localStorage.getItem('token');
 
-  // Fonction pour charger les biens existants lors du chargement initial
   useEffect(() => {
-    chargerBiens();
-  }, []);
+    if (!token) {
+      return;
+    }
 
-  const chargerBiens = () => {
-    // Exemple fictif de données de biens
-    const biensRecuperes = [
-      {
-        id: 1,
-        nom: 'Bien A',
-        description: 'Description A',
-        localisation: 'Localisation A',
-        dateAcquisition: '2024-06-30',
-        valeur: 100000,
-        etat: 'Bon',
-      },
-      {
-        id: 2,
-        nom: 'Bien B',
-        description: 'Description B',
-        localisation: 'Localisation B',
-        dateAcquisition: '2024-06-25',
-        valeur: 80000,
-        etat: 'À rénover',
-      },
-    ];
-    // Inverser l'ordre des biens récupérés
-    setBiens(biensRecuperes.reverse());
-  };
-
-  const handleEnregistrer = () => {
-    // Appeler votre service pour enregistrer un nouveau bien
-    const nouveauBien = {
-      nom,
-      description,
-      localisation,
-      dateAcquisition,
-      valeur,
-      etat,
+    const fetchBiensData = async () => {
+      try {
+        const data = await getBiens(token);
+        setBiens(data);
+        setFilteredBiens(data);
+      } catch (error) {
+        console.error('Error fetching biens:', error);
+      }
     };
-    // Implémentation du service ici
-    // Réinitialiser les champs après l'enregistrement
-    handleCloseModal();
+
+    fetchBiensData();
+  }, [token]);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value === '') {
+      setFilteredBiens(biens);
+    } else {
+      setFilteredBiens(
+        biens.filter((bien) =>
+          bien.nom.toLowerCase().includes(e.target.value.toLowerCase())
+        )
+      );
+    }
   };
 
-  const handleModifier = () => {
-    // Appeler votre service pour modifier un bien existant
-    const bienModifie = {
-      id: idBien,
-      nom,
-      description,
-      localisation,
-      dateAcquisition,
-      valeur,
-      etat,
-    };
-    // Implémentation du service ici
-    // Réinitialiser les champs après la modification
-    handleCloseModal();
+  const handleEnregistrer = async () => {
+    try {
+      const newBien = {
+        nom,
+        description,
+        localisation,
+        dateAcquisition,
+        valeur,
+        etat,
+        image,
+      };
+
+      const response = await createBien(newBien, token);
+
+      // Vérifier si la réponse contient un bien avec un id valide
+      if (response.data && response.data.id) {
+        // Mettre à jour la liste des biens localement
+        setBiens([...biens, response.data]);
+
+        handleCloseModal();
+
+        // Réinitialiser les champs du formulaire
+        setIdBien('');
+        setNom('');
+        setDescription('');
+        setLocalisation('');
+        setDateAcquisition('');
+        setValeur('');
+        setEtat('');
+        setImage(null);
+
+        // Enregistrer l'historique de modification
+        enregistrerHistoriqueModification(response.data);
+      } else {
+        console.error('Error adding bien: Invalid response data');
+        // Gérer l'erreur ou afficher un message à l'utilisateur
+      }
+    } catch (error) {
+      console.error('Error adding bien:', error);
+      // Gérer l'erreur ou afficher un message à l'utilisateur
+    }
   };
 
-  const handleSupprimer = (id) => {
-    // Appeler votre service pour supprimer un bien
-    // Implémentation du service ici
+  const handleModifier = async () => {
+    try {
+      const updatedBien = {
+        id: idBien,
+        nom: nom || '',
+        description: description || '',
+        localisation: localisation || '',
+        dateAcquisition: dateAcquisition || '',
+        valeur: valeur || '',
+        etat: etat || '',
+        image: image || null,
+      };
+
+      const response = await updateBien(updatedBien, token);
+
+      // Vérifier si la réponse contient un bien avec un id valide
+      if (response.data && response.data.id) {
+        // Mettre à jour localement la liste des biens avec le bien mis à jour
+        const updatedBiens = biens.map((bien) =>
+          bien.id === response.data.id ? response.data : bien
+        );
+        setBiens(updatedBiens);
+
+        // Enregistrer l'historique de modification
+        enregistrerHistoriqueModification(response.data);
+
+        handleCloseModal();
+        // Réinitialiser les champs du formulaire
+        setIdBien('');
+        setNom('');
+        setDescription('');
+        setLocalisation('');
+        setDateAcquisition('');
+        setValeur('');
+        setEtat('');
+        setImage(null);
+      } else {
+        console.error('Error updating bien: Invalid response data');
+        // Gérer l'erreur ou afficher un message à l'utilisateur
+      }
+    } catch (error) {
+      console.error('Error updating bien:', error);
+      // Gérer l'erreur ou afficher un message à l'utilisateur
+    }
+  };
+
+  const handleSupprimer = async (id) => {
+    try {
+      await deleteBien(id, token);
+
+      // Mettre à jour localement la liste des biens en retirant le bien supprimé
+      const updatedBiens = biens.filter((bien) => bien.id !== id);
+      setBiens(updatedBiens);
+    } catch (error) {
+      console.error('Error deleting bien:', error);
+    }
   };
 
   const handleShowModal = (bien) => {
@@ -89,6 +170,7 @@ export default function Gestiondebien() {
     setDateAcquisition(bien.dateAcquisition || '');
     setValeur(bien.valeur || '');
     setEtat(bien.etat || '');
+    setImage(bien.image || null);
     setShowModal(true);
   };
 
@@ -100,7 +182,43 @@ export default function Gestiondebien() {
     setDateAcquisition('');
     setValeur('');
     setEtat('');
+    setImage(null);
     setShowModal(false);
+  };
+
+  const headers = [
+    { label: 'اسم العقار', key: 'nom' },
+    { label: 'الوصف', key: 'description' },
+    { label: 'الموقع', key: 'localisation' },
+    { label: 'تاريخ الاقتناء', key: 'dateAcquisition' },
+    { label: 'القيمة', key: 'valeur' },
+    { label: 'الحالة', key: 'etat' },
+  ];
+
+  const enregistrerHistoriqueModification = (bien) => {
+    setModificationHistory((prevHistory) => ({
+      ...prevHistory,
+      [bien.id]: [
+        ...(prevHistory[bien.id] || []),
+        { ...bien, date: new Date().toISOString() },
+      ],
+    }));
+  };
+
+  const handleShowHistoryModal = (bien) => {
+    setIdBien(bien.id);
+    setShowHistoryModal(true);
+  };
+
+  const handleCloseHistoryModal = () => {
+    setIdBien('');
+    setShowHistoryModal(false);
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(URL.createObjectURL(e.target.files[0]));
+    }
   };
 
   return (
@@ -111,13 +229,37 @@ export default function Gestiondebien() {
       </header>
       <div className="Form-container">
         <h2 className="title">إدارة الأملاك البلدية</h2>
+
         <div className="btn-add">
           <Button variant="primary" onClick={() => handleShowModal({})}>
             إضافة عقار جديد
           </Button>
+
+          <CSVLink
+            data={biens}
+            headers={headers}
+            filename={'biens.csv'}
+            className="btn btn-success"
+            target="_blank"
+          >
+            تصدير CSV
+          </CSVLink>
         </div>
-        <br></br>
-        <Table striped bordered hover className='table-aff'>
+        <Form.Control
+          type="text"
+          placeholder="ابحث عن عقار"
+          value={searchTerm}
+          onChange={handleSearch}
+          style={{
+            marginTop: '10px',
+            textAlign: 'right',
+            width: '20%',
+            marginLeft: '2%',
+          }}
+        />
+
+        <br />
+        <Table striped bordered hover className="table-aff">
           <thead>
             <tr>
               <th>إجراءات</th>
@@ -127,36 +269,48 @@ export default function Gestiondebien() {
               <th>الموقع</th>
               <th>الوصف</th>
               <th>اسم العقار</th>
+              <th>الصورة</th>
             </tr>
           </thead>
           <tbody>
-            {biens
-              .slice() // Créer une copie pour éviter de modifier l'ordre dans biens original
-              .reverse() // Inverser l'ordre des éléments
-              .map((bien) => (
-                <tr key={bien.id}>
-                  <td>
-                    <Button
-                      variant="info"
-                      onClick={() => handleShowModal(bien)}
-                    >
-                      تعديل
-                    </Button>{' '}
-                    <Button
-                      variant="danger"
-                      onClick={() => handleSupprimer(bien.id)}
-                    >
-                      حذف
-                    </Button>
-                  </td>
-                  <td>{bien.etat}</td>
-                  <td>{bien.valeur}</td>
-                  <td>{bien.dateAcquisition}</td>
-                  <td>{bien.localisation}</td>
-                  <td>{bien.description}</td>
-                  <td>{bien.nom}</td>
-                </tr>
-              ))}
+            {filteredBiens.map((bien) => (
+              <tr key={bien.id}>
+                <td>
+                  <Button variant="info" onClick={() => handleShowModal(bien)}>
+                    تعديل
+                  </Button>{' '}
+                  <Button
+                    variant="danger"
+                    onClick={() => handleSupprimer(bien.id)}
+                  >
+                    حذف
+                  </Button>{' '}
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleShowHistoryModal(bien)}
+                  >
+                    عرض التاريخ
+                  </Button>
+                </td>
+                <td>{bien.etat}</td>
+                <td>{bien.valeur}</td>
+                <td>
+                  {new Date(bien.dateAcquisition).toLocaleDateString('ar-EG')}
+                </td>
+                <td>{bien.localisation}</td>
+                <td>{bien.description}</td>
+                <td>{bien.nom}</td>
+                <td>
+                  {bien.image && (
+                    <img
+                      src={bien.image}
+                      alt={bien.nom}
+                      style={{ width: '100px', height: '100px' }}
+                    />
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
 
@@ -193,7 +347,7 @@ export default function Gestiondebien() {
                 <Form.Label>الموقع</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="ادخل الموقع الجغرافي"
+                  placeholder="ادخل الموقع"
                   value={localisation}
                   onChange={(e) => setLocalisation(e.target.value)}
                   style={{ textAlign: 'right' }}
@@ -203,7 +357,6 @@ export default function Gestiondebien() {
                 <Form.Label>تاريخ الاقتناء</Form.Label>
                 <Form.Control
                   type="date"
-                  placeholder="YYYY-MM-DD"
                   value={dateAcquisition}
                   onChange={(e) => setDateAcquisition(e.target.value)}
                   style={{ textAlign: 'right' }}
@@ -213,7 +366,7 @@ export default function Gestiondebien() {
                 <Form.Label>القيمة</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="ادخل القيمة المالية"
+                  placeholder="ادخل القيمة"
                   value={valeur}
                   onChange={(e) => setValeur(e.target.value)}
                   style={{ textAlign: 'right' }}
@@ -222,28 +375,85 @@ export default function Gestiondebien() {
               <Form.Group controlId="formEtat">
                 <Form.Label>الحالة</Form.Label>
                 <Form.Control
-                  type="text"
-                  placeholder="ادخل الحالة الحالية للعقار"
+                  as="select"
                   value={etat}
                   onChange={(e) => setEtat(e.target.value)}
                   style={{ textAlign: 'right' }}
+                >
+                  <option>ممتاز</option>
+                  <option>جيد</option>
+                  <option>متوسط</option>
+                  <option>سيء</option>
+                </Form.Control>
+              </Form.Group>
+              <Form.Group controlId="formImage">
+                <Form.Label>صورة العقار</Form.Label>
+                <Form.Control
+                  type="file"
+                  onChange={handleImageChange}
+                  style={{ textAlign: 'right' }}
                 />
+                {image && (
+                  <img
+                    src={image}
+                    alt="Selected property"
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      marginTop: '10px',
+                    }}
+                  />
+                )}
               </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
+              إلغاء
+            </Button>
+            <Button
+              variant={idBien ? 'info' : 'primary'}
+              onClick={idBien ? handleModifier : handleEnregistrer}
+            >
+              {idBien ? 'تعديل' : 'إضافة'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={showHistoryModal}
+          onHide={handleCloseHistoryModal}
+          dir="rtl"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>تاريخ التعديلات على العقار</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {modificationHistory[idBien] &&
+            modificationHistory[idBien].length > 0 ? (
+              <ul>
+                {modificationHistory[idBien].map((history, index) => (
+                  <li key={index}>
+                    <strong>التاريخ:</strong>{' '}
+                    {new Date(history.date).toLocaleString()} <br />
+                    <strong>الاسم:</strong> {history.nom} <br />
+                    <strong>الوصف:</strong> {history.description} <br />
+                    <strong>الموقع:</strong> {history.localisation} <br />
+                    <strong>تاريخ الاقتناء:</strong> {history.dateAcquisition}{' '}
+                    <br />
+                    <strong>القيمة:</strong> {history.valeur} <br />
+                    <strong>الحالة:</strong> {history.etat}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>لا توجد تعديلات لهذا العقار حتى الآن.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseHistoryModal}>
               إغلاق
             </Button>
-            {idBien ? (
-              <Button variant="primary" onClick={handleModifier}>
-                حفظ التعديلات
-              </Button>
-            ) : (
-              <Button variant="primary" onClick={handleEnregistrer}>
-                إضافة عقار
-              </Button>
-            )}
           </Modal.Footer>
         </Modal>
       </div>
