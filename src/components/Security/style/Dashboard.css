@@ -62,7 +62,19 @@
   text-decoration: underline;
 }
 
-
+.has-submenu {
+  cursor: pointer;
+  display: block;
+  text-decoration: none;
+  color: #fff; /* Couleur du texte des liens */
+  font-size: 1rem;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+  
+}
+.has-submenu:hover {
+  background-color: #555; /* Couleur de fond au survol */
+}
 
 
 .header {

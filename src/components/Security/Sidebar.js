@@ -4,14 +4,13 @@ import './style/Dashboard.css';
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [isContractsOpen, setIsContractsOpen] = useState(false);
 
   const handleLogout = () => {
-    // Supprimer le token JWT du localStorage
     localStorage.removeItem('token');
-    // Rediriger vers la page de connexion ou une autre page appropriée
-    navigate('/login'); // Utilisez useNavigate ou l'approche de navigation que vous préférez
+    navigate('/login');
   };
-  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -19,10 +18,15 @@ export default function Sidebar() {
       const tokenPayload = token.split('.')[1];
       const decodedTokenPayload = atob(tokenPayload);
       const parsedTokenPayload = JSON.parse(decodedTokenPayload);
-      const username = parsedTokenPayload.sub; // 'sub' est le champ contenant le nom d'utilisateur
+      const username = parsedTokenPayload.sub;
       setUsername(username);
     }
   }, []);
+
+  const toggleContracts = () => {
+    setIsContractsOpen(!isContractsOpen);
+  };
+
   return (
     <div className="sidebar">
       <h2>القائمة الجانبية</h2>
@@ -36,6 +40,22 @@ export default function Sidebar() {
           </li>
           <li>
             <Link to="/gestiondebien">الأملاك البلدية</Link>
+          </li>
+          <li>
+            <Link to="/maintenanceform">الأنشطة المخططة</Link>
+          </li>
+          <li onClick={toggleContracts} className="has-submenu">
+            العقود
+            {isContractsOpen && (
+              <ul className="submenu">
+                <li>
+                  <Link to="/salescontracts">عقود البيع</Link>
+                </li>
+                <li>
+                  <Link to="/rentalcontracts">عقود الكراء</Link>
+                </li>
+              </ul>
+            )}
           </li>
           <li>
             <Link to="/settings">الإعدادات</Link>

@@ -19,6 +19,8 @@ export default function Gestiondebien() {
   const [valeur, setValeur] = useState('');
   const [etat, setEtat] = useState('');
   const [image, setImage] = useState(null);
+  const [vacant, setVacant] = useState('');
+
   const [showModal, setShowModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [modificationHistory, setModificationHistory] = useState({});
@@ -70,19 +72,15 @@ export default function Gestiondebien() {
         dateAcquisition,
         valeur,
         etat,
+        vacant, // Inclure le champ vacant
         image,
       };
 
       const response = await createBien(newBien, token);
 
-      // Vérifier si la réponse contient un bien avec un id valide
       if (response.data && response.data.id) {
-        // Mettre à jour la liste des biens localement
         setBiens([...biens, response.data]);
-
         handleCloseModal();
-
-        // Réinitialiser les champs du formulaire
         setIdBien('');
         setNom('');
         setDescription('');
@@ -90,17 +88,14 @@ export default function Gestiondebien() {
         setDateAcquisition('');
         setValeur('');
         setEtat('');
+        setVacant(''); // Réinitialiser le champ vacant
         setImage(null);
-
-        // Enregistrer l'historique de modification
         enregistrerHistoriqueModification(response.data);
       } else {
         console.error('Error adding bien: Invalid response data');
-        // Gérer l'erreur ou afficher un message à l'utilisateur
       }
     } catch (error) {
       console.error('Error adding bien:', error);
-      // Gérer l'erreur ou afficher un message à l'utilisateur
     }
   };
 
@@ -114,24 +109,19 @@ export default function Gestiondebien() {
         dateAcquisition: dateAcquisition || '',
         valeur: valeur || '',
         etat: etat || '',
+        vacant: vacant || '', // Inclure le champ vacant
         image: image || null,
       };
 
       const response = await updateBien(updatedBien, token);
 
-      // Vérifier si la réponse contient un bien avec un id valide
       if (response.data && response.data.id) {
-        // Mettre à jour localement la liste des biens avec le bien mis à jour
         const updatedBiens = biens.map((bien) =>
           bien.id === response.data.id ? response.data : bien
         );
         setBiens(updatedBiens);
-
-        // Enregistrer l'historique de modification
         enregistrerHistoriqueModification(response.data);
-
         handleCloseModal();
-        // Réinitialiser les champs du formulaire
         setIdBien('');
         setNom('');
         setDescription('');
@@ -139,22 +129,19 @@ export default function Gestiondebien() {
         setDateAcquisition('');
         setValeur('');
         setEtat('');
+        setVacant(''); // Réinitialiser le champ vacant
         setImage(null);
       } else {
         console.error('Error updating bien: Invalid response data');
-        // Gérer l'erreur ou afficher un message à l'utilisateur
       }
     } catch (error) {
       console.error('Error updating bien:', error);
-      // Gérer l'erreur ou afficher un message à l'utilisateur
     }
   };
 
   const handleSupprimer = async (id) => {
     try {
       await deleteBien(id, token);
-
-      // Mettre à jour localement la liste des biens en retirant le bien supprimé
       const updatedBiens = biens.filter((bien) => bien.id !== id);
       setBiens(updatedBiens);
     } catch (error) {
@@ -170,6 +157,7 @@ export default function Gestiondebien() {
     setDateAcquisition(bien.dateAcquisition || '');
     setValeur(bien.valeur || '');
     setEtat(bien.etat || '');
+    setVacant(bien.vacant || ''); // Initialiser le champ vacant
     setImage(bien.image || null);
     setShowModal(true);
   };
@@ -182,6 +170,7 @@ export default function Gestiondebien() {
     setDateAcquisition('');
     setValeur('');
     setEtat('');
+    setVacant(''); // Réinitialiser le champ vacant
     setImage(null);
     setShowModal(false);
   };
@@ -193,6 +182,7 @@ export default function Gestiondebien() {
     { label: 'تاريخ الاقتناء', key: 'dateAcquisition' },
     { label: 'القيمة', key: 'valeur' },
     { label: 'الحالة', key: 'etat' },
+    { label: 'شاغر', key: 'vacant' }, // Ajouter le champ vacant à l'export CSV
   ];
 
   const enregistrerHistoriqueModification = (bien) => {
@@ -263,6 +253,7 @@ export default function Gestiondebien() {
           <thead>
             <tr>
               <th>إجراءات</th>
+              <th>شاغر</th>
               <th>الحالة</th>
               <th>القيمة</th>
               <th>تاريخ الاقتناء</th>
@@ -275,7 +266,7 @@ export default function Gestiondebien() {
           <tbody>
             {filteredBiens.map((bien) => (
               <tr key={bien.id}>
-                <td>
+                <td className='col-butt'>
                   <Button variant="info" onClick={() => handleShowModal(bien)}>
                     تعديل
                   </Button>{' '}
@@ -292,6 +283,7 @@ export default function Gestiondebien() {
                     عرض التاريخ
                   </Button>
                 </td>
+                <td>{bien.vacant}</td>
                 <td>{bien.etat}</td>
                 <td>{bien.valeur}</td>
                 <td>
@@ -404,6 +396,18 @@ export default function Gestiondebien() {
                     }}
                   />
                 )}
+              </Form.Group>
+              <Form.Group controlId="formVacant">
+                <Form.Label>شاغر</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={vacant}
+                  onChange={(e) => setVacant(e.target.value)}
+                >
+                  <option value="">اختر الحالة</option>
+                  <option value="شاغر">شاغر</option>
+                  <option value="غير شاغر">غير شاغر</option>
+                </Form.Control>
               </Form.Group>
             </Form>
           </Modal.Body>
