@@ -5,6 +5,7 @@ import Login from './components/Security/Login';
 import Register from './components/Security/Register';
 import Gestiondebien from './components/Security/Gestiondebien';
 import MaintenanceForm from './components/Security/MaintenanceForm';
+import VacantProperties from './components/Security/VacantProperties';
 function App() {
   return (
     <div className="App">
@@ -15,6 +16,7 @@ function App() {
           <Route path="/maintenanceform" element={<MaintenanceForm />}></Route>
           <Route path="/register" element={<Register />}></Route>
           <Route path="/dashboard" element={<Dashboard />}></Route>
+          <Route path="/vacantprop" element={<VacantProperties />}></Route>
         </Routes>
       </BrowserRouter>
     </div>

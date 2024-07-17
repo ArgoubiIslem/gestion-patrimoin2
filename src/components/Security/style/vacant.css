@@ -1,0 +1,37 @@
+.content {
+  direction: rtl;
+  text-align: right;
+  margin-left: -20%;
+}
+
+.check-box{
+  margin-left: 50%;
+}
+/* vacant.css */
+
+.receipt-container {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.receipt-details {
+  margin-bottom: 20px;
+}
+
+.receipt-table {
+  margin-top: 20px;
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: bold;
+}

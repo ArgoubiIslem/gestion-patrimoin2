@@ -1,6 +1,9 @@
 .Form-container{
   display: flex;
   flex-wrap: wrap; /* Pour permettre aux cartes de s'enrouler si l'espace est insuffisant */
+  flex-grow: 1;
+  margin-right: 10px;
+  padding: 10px;
 
 }
 .btn-add{

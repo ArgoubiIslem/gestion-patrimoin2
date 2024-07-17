@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './style/Dashboard.css';
-
+import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export default function Sidebar() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -46,6 +47,7 @@ export default function Sidebar() {
           </li>
           <li onClick={toggleContracts} className="has-submenu">
             العقود
+            <FontAwesomeIcon icon={isContractsOpen ? faCaretUp : faCaretDown} className="submenu-icon" />
             {isContractsOpen && (
               <ul className="submenu">
                 <li>

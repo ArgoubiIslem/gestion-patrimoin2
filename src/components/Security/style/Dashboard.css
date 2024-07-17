@@ -76,7 +76,9 @@
   background-color: #555; /* Couleur de fond au survol */
 }
 
-
+.submenu-icon {
+  margin-right: 10%;
+}
 .header {
   display: flex;
   align-items: center;
